@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>angularjs provider 五种recipe type的分析 代码</title>
+	<script type="text/javascript" src="angular.min.js"></script>
+	<link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+</head>
+
+	<!-- <div ng-controller='xctrl'>
+		<div my-directive name="myName" age="myAge" sex="male" say="say()"></div>
+	</div> -->
+
+	<body ng-app='myApp'   >
+		<!-- <div class="container" ng-controller="AppCtrl">
+			
+		</div> -->
+		<div ng-controller="DemoController as demo">
+	    Client ID: {{demo.clientId}}
+	    planetName : {{demo.planetName}}
+	  </div>
+
+	</body>
+
+	<script type="text/javascript">
+	
+	var myApp = angular.module('myApp', []);
+
+	//(1) value
+ //    myApp.value('clientId', 'a12345654321x');
+
+    
+	// myApp.controller('DemoController', ['clientId', function(x) {
+	//   this.clientId = x;
+	// }]);
+    
+    //(2) factory 1
+    myApp.factory('clientId', function() {
+  		return 'a12345654321x';
+	});
+
+
+
+    //(2)factory 2
+	myApp.factory('apiToken', ['clientId', function (y) {
+		var encrypt = function(data1, data2) {
+		// NSA-proof encryption algorithm:
+		   return (data1 + ':' + data2).toUpperCase();
+		};
+        
+        var secret='abc';
+		// var secret = window.localStorage.getItem('myApp.secret');
+		var apiToken = encrypt(y, secret);
+
+		return apiToken;
+	}]);
+    // myApp.controller('DemoController', ['apiToken', function(x) {
+	//   this.clientId = x;
+	// }]);
+	
+    //(2) factory 3
+	function UnicornLauncher(apiToken) {
+
+	  this.launchedCount = apiToken;
+	   this.launch = function(v) {
+	    // Make a request to the remote API and include the apiToken
+	    // ...
+	    return apiToken+v;
+
+
+	  }
+      return this.launchedCount;
+	  
+	}
+// 
+	myApp.factory('unicornLauncher', ["apiToken", function(z) {
+	  var m=new UnicornLauncher(z);
+	  return m.launch('zzzzz');
+	}]);
+
+	// myApp.controller('DemoController', ['unicornLauncher', function(x) {
+	//   this.clientId = x;
+	// }]);
+    
+    //(4) service 
+	// myApp.service('unicornLauncher', ["apiToken", UnicornLauncher]);
+    
+    //(5) provider 
+    myApp.provider('unicornLauncher', function UnicornLauncherProvider() {
+	  var useTinfoilShielding = false;
+
+	  this.useTinfoilShielding = function(value) {
+	    useTinfoilShielding = !!value;
+	  };
+      
+      
+	  this.$get = ["apiToken", function unicornLauncherFactory(apiToken) {
+
+	    // let's assume that the UnicornLauncher constructor was also changed to
+	    // accept and use the useTinfoilShielding argument
+	    return new UnicornLauncher(apiToken, useTinfoilShielding);
+	  }];
+
+	});
+
+	myApp.config(["unicornLauncherProvider", function(unicornLauncherProvider) {
+	  unicornLauncherProvider.useTinfoilShielding(false);
+	}]);
+
+	myApp.constant('planetName', 'Greasy Giant');
+
+    myApp.controller('DemoController', ['unicornLauncher','planetName', function(x,y) {
+	  this.clientId = x;
+	  this.planetName=y;
+	}]);
+</script>
+</html>
